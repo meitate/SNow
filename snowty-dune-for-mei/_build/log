@@ -1,0 +1,40 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /home/meitate/.cache/dune/db
+# Workspace root: /home/meitate/Downloads/snowty-dune-for-mei
+# Auto-detected concurrency: 8
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/meitate/.opam/thesis/bin/ocamlc.opt -config > /tmp/dune_4f9560_output
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamldep.opt -modules -impl src/snow.ml) > _build/default/src/.snow.eobjs/dune__exe__Snow.impl.d
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/menhir --explain --inspection --table --dump src/parser.mly --base src/parser --infer-write-query src/parser__mock.ml.mock)
+> File "src/parser.mly", line 47, characters 7-13:
+> Warning: the token ACCEPT is unused.
+> File "src/parser.mly", line 22, characters 7-9:
+> Warning: the token AT is unused.
+> File "src/parser.mly", line 46, characters 7-14:
+> Warning: the token HANDOFF is unused.
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -bin-annot-occurrences -I src/.xntb.objs/byte -I src/.ast.objs/byte -no-alias-deps -opaque -o src/.xntb.objs/byte/xntb.cmo -c -impl src/xntb.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/xntb.cma src/.xntb.objs/byte/xntb.cmo)
+$ (cd _build/.sandbox/0256f6f76a4ab8d8e2a14f4bc8eb240b/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.snow.eobjs/byte -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.xntb.objs/byte -open Dune__exe -short-paths -i -impl src/parser__mock.ml.mock) > _build/.sandbox/0256f6f76a4ab8d8e2a14f4bc8eb240b/default/src/parser__mock.mli.inferred
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.xntb.objs/byte -I src/.xntb.objs/native -I src/.ast.objs/byte -I src/.ast.objs/native -intf-suffix .ml -no-alias-deps -opaque -o src/.xntb.objs/native/xntb.cmx -c -impl src/xntb.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/xntb.cmxa src/.xntb.objs/native/xntb.cmx)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/menhir --explain --inspection --table --dump src/parser.mly --base src/parser --infer-read-reply src/parser__mock.mli.inferred)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -bin-annot-occurrences -I src/.snow.eobjs/byte -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.xntb.objs/byte -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/byte/dune__exe__Parser.cmi -c -intf src/parser.mli)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I src -o src/xntb.cmxs src/xntb.cmxa)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -bin-annot-occurrences -I src/.snow.eobjs/byte -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.xntb.objs/byte -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/byte/dune__exe__Checker.cmo -c -impl src/checker.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -bin-annot-occurrences -I src/.snow.eobjs/byte -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.xntb.objs/byte -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/byte/dune__exe__Lexer.cmo -c -impl src/lexer.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -bin-annot-occurrences -I src/.snow.eobjs/byte -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.xntb.objs/byte -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/byte/dune__exe__Snow.cmo -c -impl src/snow.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.snow.eobjs/byte -I src/.snow.eobjs/native -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.ast.objs/native -I src/.xntb.objs/byte -I src/.xntb.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/native/dune__exe__Lexer.cmx -c -impl src/lexer.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.snow.eobjs/byte -I src/.snow.eobjs/native -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.ast.objs/native -I src/.xntb.objs/byte -I src/.xntb.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/native/dune__exe__Snow.cmx -c -impl src/snow.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.snow.eobjs/byte -I src/.snow.eobjs/native -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.ast.objs/native -I src/.xntb.objs/byte -I src/.xntb.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/native/dune__exe__Checker.cmx -c -impl src/checker.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.snow.eobjs/byte -I src/.snow.eobjs/native -I /home/meitate/.opam/thesis/lib/menhirLib -I src/.ast.objs/byte -I src/.ast.objs/native -I src/.xntb.objs/byte -I src/.xntb.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.snow.eobjs/native/dune__exe__Parser.cmx -c -impl src/parser.ml)
+$ (cd _build/default && /home/meitate/.opam/thesis/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o src/snow.exe src/ast.cmxa src/xntb.cmxa /home/meitate/.opam/thesis/lib/menhirLib/menhirLib.cmxa src/.snow.eobjs/native/dune__exe.cmx src/.snow.eobjs/native/dune__exe__Checker.cmx src/.snow.eobjs/native/dune__exe__Parser.cmx src/.snow.eobjs/native/dune__exe__Lexer.cmx src/.snow.eobjs/native/dune__exe__Snow.cmx)

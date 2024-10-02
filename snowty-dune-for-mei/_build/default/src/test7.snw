@@ -1,0 +1,50 @@
+han <out> sendNull (n:int) {
+  when n <= 0 do {
+    select DONE -> out;
+    close out;
+    stop;
+  } otherwise {
+    select ANOTHER -> out;
+    now <out> sendNull (n-1);
+  }
+} 
+
+han <cin,out> get (number:int) {
+  when number <= 0 do {
+    handle cin of {
+    | EOS -> {
+        await cin;
+        now <out> sendNull (number);
+      }
+    | LINE -> {
+        receive line:string <- cin;
+        now <cin,out> get (0);
+      }
+    }
+  } otherwise {
+    handle cin of {
+    | EOS -> {
+        await cin;
+        now <out> sendNull (number);
+      }
+    | LINE -> {
+        receive line:string <- cin;
+        select ANOTHER -> out;
+        send line -> out;
+        now <cin,out> get (number-1);
+      }
+    }
+  }
+}
+
+han <cin,cout> main (args:string) {
+  select LINE -> cout;
+  send "Starting test7" -> cout;
+  start <cin,$getter> get (2);
+  receive x1:string <- getter;
+  receive x2:string <- getter;
+  await getter;
+  select EOS -> cout;
+  close cout;
+  stop;
+}

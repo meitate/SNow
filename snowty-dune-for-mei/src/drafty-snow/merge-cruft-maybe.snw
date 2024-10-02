@@ -1,0 +1,103 @@
+han <cin,ins> getStream := { 
+    handle cin of
+    | EOF <= { 
+        select DONE => ins;
+        close ins;
+        await cin;
+        stop;
+    }
+    | LINE <= {
+          recv line <= cin;
+          select NEXT => ins;
+          send strToInt => ins;
+          now <cin,ins> getStream;
+    }
+}
+
+han <cout,outs> putStream := { 
+    handle outs of
+    | DONE <= { 
+        await outs;
+        select EOF => cout;
+        close cout;
+        stop;
+    }
+    | NEXT <= {
+          recv x <= outs;
+          select LINE => cout;
+          send intToStr => cout;
+          now <cout,outs> putStream;
+    }
+    ;
+}
+
+han <ins,outs> sort := {
+    handle ins of 
+    | DONE <= {
+        select DONE => outs;
+        await ins;
+        close outs;
+        stop;
+    }
+    | NEXT <= {
+        recv x <= ins;
+        now <ins,outs> sortOdd x
+    }
+
+han <ins,outs> sort1 x0 := 
+    handle ins of 
+    | DONE <= {
+        select NEXT => outs;
+        send x => outs
+        await ins;
+        close outs;
+        stop;
+    }
+    | NEXT <= {
+        recv x1 <= ins;
+        new ins0 <=> ins0n;
+        new outs0 <=> outs0n;
+        new ins1 <=> outs1;
+        start <ins,ins0,ins1> split x0 x1;
+        start <ins0,outs0> sort;
+        start <ins1,outs1> sort;
+        now <outs,outs0,outs1> merge;
+    }
+} 
+
+han <ins,ins0,ins1> split x0 x1;
+    handle ins of 
+    | DONE <= {
+        now <ins,ins0,ins1> splitDone x0 x1;
+    }
+    | NEXT <= {
+        recv x2 <= ins;
+        select NEXT => ins0
+        send x0 => ins0;
+        now <ins,ins1,ins0> split x1 x2;
+    }
+    ;
+}
+        
+han <ins,ins0,ins1> splitDone x0 x1;
+    send x0 => ins0;
+    select DONE => ins0;
+    close ins0;
+    send x1 => ins1;
+    select DONE => ins1;
+    close ins1;
+    await ins;
+    stop;
+}
+
+
+
+        
+
+han <cin,cout> main := {
+    new ins <=> instream;
+    start <cin, ins> getStream;
+    new outs <=> outstream;
+    start <cout,outs> putStream;
+    now <instream,outstream> sort;
+}

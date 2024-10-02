@@ -1,0 +1,19 @@
+han <c> min(x:int,y:int) { 
+  when x <= y 
+  do { 
+    send x -> c;
+    close c;
+    stop; 
+  } otherwise { 
+    send y -> c;
+    close c;
+    stop;
+  } 
+}
+
+han <cin,cout> main(args:string) { 
+  start <cin> min(42,37);
+  receive m:int <- cout;
+  await cout;
+  stop;
+}

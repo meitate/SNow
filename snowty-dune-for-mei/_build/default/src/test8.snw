@@ -1,0 +1,27 @@
+han <d> bar (y:int) {
+  when y <= 0 do {
+    select BAZ -> d;
+    close d;
+    stop;
+  } otherwise {
+    select BAR -> d;
+    now <d> bar (y-1);
+  }
+} 
+
+han <c> foo (x:int) {
+  send x -> c;
+  receive y:string <- c;
+  select FOO -> c;
+  handle c of {
+  | BAR -> {
+      start <c> bar (42);
+      stop;
+    }
+  | BAZ -> {
+      send 42 -> c;
+      send true -> c;
+      now <c> foo (x+1);
+    }
+  }
+}

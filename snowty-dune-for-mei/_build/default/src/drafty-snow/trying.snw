@@ -1,0 +1,135 @@
+han <cin,server,cout> echo () {
+  handle cin of {
+  | LINE(toSend:string) -> {
+      select ECHO(toSend;reply:string) <- server;
+      select LINE(reply) -> cout;
+      now <cin,server,cout> echo ();
+    }
+  | EOS. -> {
+      select CLOSE(num_uses:int) <- server;
+      select LINE("Echoes: " ^ string_of_int(num_uses)) -> cout;
+      select EOS. -> cout;
+    }
+  }
+
+
+han <cin,cout> EchoClient (hostname:string,port:int) {
+
+
+  start <$server> tcpipConnect (hostname,port);
+  handle cin of {
+  | LINE(toSend:string) -> {
+      select ECHO(toSend;reply:string) <- server;
+      select LINE(reply) -> cout;
+      now <cin,server,cout> echo
+  
+  
+han <cin,cout> EchoService (args:string) {
+  start <$listener> tcpipBind (3000);
+  handle listener of {
+    | CONNECT(client:)
+    | ERROR(
+  
+  
+"handoff <c,d,e> -> c';"
+"handoff <$c,d,e> -> c';"
+
+"send e -> c;"
+"send e. -> c;" is "send e -> c; close c;"
+"send e? -> c;" is "send e -> c; await c;"
+
+
+"receive x:t <- c;"
+"receive x:t. <- c;" is "receive x:t <- c; close c;"
+"receive x:t? <- c;" is "receive x:t <- c; await c;"
+
+"select X -> c;"
+"select X. -> c;" is "select X -> c; close c;"
+"select X? -> c;" is "select X -> c; await c;"
+"select X(e) -> c;" is "select X -> c; send e -> c;"
+"select X(e). -> c;" is "select X -> c; send e -> c; close c;" 
+"select X(e)? -> c;" is "select X -> c; send e -> c; await c;" 
+"select X(x:t) <- c;" is "select X -> c; receive x:t <- c;"
+"select X(x:t). <- c;" is "select X -> c; receive x:t <- c; close c;"
+"select X(x:t)? <- c;" is "select X -> c; receive x:t <- c; await c;"
+"select X(e;x:t) <- c;" is "select X -> c; send e -> c; receive x:t <- c;"
+"select X(e;x:t). <- c;" is "select X -> c; send e -> c; receive x:t <- c; close c;"
+"select X(e;x:t)? <- c;" is "select X -> c; send e -> c; receive x:t <- c; await c;"
+
+"(<- c : t)"
+"(. <- c : t)"
+"(? <- c : t)"
+"(X <- c : t)"
+"(X. <- c : t)"
+"(X? <- c : t)"
+"(X(e) <- c : t)"
+"(X(e). <- c : t)"
+"(X(e)? <- c : t)"
+
+han <hd,tl> container (x:int) {
+  handle hd of {
+  | DEQUEUE -> {
+      send SOME(x) -> hd;
+      link hd <-> tl;
+      stop;
+    }
+  | HEAD -> {
+      send SOME(x) -> hd;
+      loop;
+    }
+  }
+}
+
+
+han <q> emptyQueue () {
+  handle q of {
+  | IS_EMPTY -> {
+      send true -> q;
+      loop;
+    }
+  | HEAD -> {
+      select NONE -> q;
+      loop;
+    } 
+  | ENQUEUE(x:int) -> {
+      start <$hd,$tl> container (x); 
+      now <q,hd,tl> queue ();
+    }
+   | DEQUEUE -> {
+      select NONE -> q;
+      loop;
+    }
+  }
+}
+
+han <q,hd,tl> queue () {
+  handle q of {
+  | IS_EMPTY -> {
+      send false -> q;
+      loop;
+    }
+  | HEAD -> {
+      select HEAD(x:int) <- hd;
+      select SOME(x) -> q;
+      loop;
+    }
+  | ENQUEUE(x:int) -> {
+      start <tl,$new_tl> container (x);
+      now <q,hd,new_tl> queue ();
+    }
+  | DEQUEUE -> {
+      select DEQUEUE(x:int) <- hd;
+      select SOME(x) -> q;
+      handle hd of {
+      | EMPTY -> {
+          close hd;
+          close tl;
+          now <q> emptyQueue ();
+        }
+      | NOT_EMPTY -> {
+          loop;
+        }
+      }
+    }
+  }
+}

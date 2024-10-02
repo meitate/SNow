@@ -1,0 +1,42 @@
+fun int_of_string (s:string) : int = 42
+
+fun string_of_int (x:int) : string = "42"
+
+han <ins,fwd> sender () {
+  handle ins of {
+  | EOS -> {
+      await ins;
+      select DONE -> fwd;
+      close fwd;
+      stop;
+    }
+  | LINE -> {
+      receive line:string <- cin;
+      select ANOTHER -> fwd;
+      send int_of_string(line) -> fwd;
+      now <ins,fwd> sender ();
+    }
+  }
+}
+
+han <fwd,outs> receiver () {
+  handle fwd of {
+  | DONE -> {
+      await fwd;
+      select EOS -> outs;
+      close outs;
+      stop;
+    }
+  | ANOTHER -> {
+      receive x:int <- fwd;
+      select LINE -> outs;
+      send string_of_int(x) -> outs;
+      now <fwd,outs> receiver ();
+    }
+  }
+}
+
+han <cin,cout> main (args:string) {
+  start <cin,$stream> sender ();
+  now <stream,cout> receiver ();
+}

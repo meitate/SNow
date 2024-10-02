@@ -1,0 +1,76 @@
+type token =
+    WHEN
+  | UNIT
+  | TRUE
+  | TIMES
+  | THEN
+  | TEXT of string
+  | STRING
+  | STOP
+  | START
+  | SEND
+  | SEMI
+  | SELECT
+  | RPAREN
+  | RECEIVE
+  | RBRACE
+  | RARROW
+  | RANGLE
+  | PLUS
+  | OTHERWISE
+  | ORELSE
+  | OPEN
+  | OF
+  | NUMBER of int
+  | NOW
+  | NOT
+  | NAME of string
+  | MINUS
+  | LRARROW
+  | LPAREN
+  | LET
+  | LESSEQ
+  | LBRACE
+  | LARROW
+  | LANGLE
+  | INT
+  | IF
+  | HANDOFF
+  | HANDLE
+  | HAN
+  | FUN
+  | FALSE
+  | EQUALS
+  | EOF
+  | ELSE
+  | DO
+  | COMMA
+  | COLON
+  | CLOSE
+  | CHA_CHING
+  | BOOL
+  | BAR
+  | AWAIT
+  | AT
+  | ASSIGN
+  | ANDALSO
+  | ACCEPT
+val infoCounter : int ref
+val genInfo : Lexing.position -> Ast.info
+val menhir_begin_marker : int
+val xv_vtyp : Ast.vtyp
+val xv_stmt : Ast.stmt
+val xv_prmsc : (string * Ast.vtyp) list
+val xv_prms : (string * Ast.vtyp) list
+val xv_prgm : Ast.prgm
+val xv_hbndlc : (string * string) list * string list
+val xv_hbndl : (string * string) list * string list
+val xv_expnsc : Ast.expn list
+val xv_expns : Ast.expn list
+val xv_expn : Ast.expn
+val xv_decls : Ast.decl list
+val xv_cases : Ast.hcas list
+val xv_bndlc : string list
+val xv_bndl : string list
+val xv_blck : Ast.stmt
+val menhir_end_marker : int

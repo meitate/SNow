@@ -1,0 +1,8 @@
+fun f (n:int) : int = n+1
+
+han <cin,cout> main (args:string) {
+  let x := f(42);
+  await cin;
+  close cout;
+  stop;
+}

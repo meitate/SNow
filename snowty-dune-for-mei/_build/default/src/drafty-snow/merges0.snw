@@ -1,0 +1,153 @@
+
+han <out> endIntStream () {
+  select DONE -> out;
+  close out;
+  stop;
+}
+
+han <out> endIntStreamWith (x:int) {
+  select ANOTHER -> out;
+  send x -> out;
+  now <out> endIntStream ();
+}
+
+han <in,out0,out1> split(x0:int,x1:int) {
+  handle in of {
+  | DONE -> {
+      await in;
+      start <out0> endIntStreamWith (x0);
+      start <out1> endIntStreamWith (x1);
+      stop;
+    }
+  | ANOTHER -> {
+      receive x2:int <- in;
+      select ANOTHER -> out0;
+      send x0 -> out0;
+      now <in,out1,out0> split (x1,x2);
+    }
+  }
+}
+
+han <ins,outs> forward () {
+  handle ins of {
+  | DONE -> {
+      await ins;
+      select DONE -> outs;
+      close outs;
+      stop;
+    }
+  | ANOTHER -> {
+      receive x:int <- ins;
+      select ANOTHER -> outs;
+      send x -> outs;
+      now <ins,outs> forward ();
+    }
+  }
+}
+   
+han <ins0,ins1,outs> mergeNext (x0:int,x1:int) {
+  select ANOTHER -> outs; send x0 -> outs;
+  handle ins0 of {
+  | DONE -> {
+      await ins0;
+      select ANOTHER -> outs; send x1 -> outs;
+      now <ins1,outs> forward ();
+    }
+  | ANOTHER -> {
+      receive x2:int <- ins0;
+      now <ins0,ins1,outs> merge (x2,x1);
+    }
+  }
+}
+
+han <ins0,ins1,outs> mergeWith (x0:int,x1:int) {
+  when x0 <= x1 do {
+    now <ins0,ins1,outs> mergeNext (x0,x1);
+  } otherwise {
+    now <ins1,ins0,outs> mergeNext (x1,x0);
+  }
+}
+
+han <ins0,ins1,outs> merge () {
+  handle ins0 of {
+  | ANOTHER -> {
+      receive x0:int <- ins0;
+      handle ins1 of {
+      | ANOTHER -> {
+          receive x1:int <- ins1;
+          now <ins0,ins1,outs> mergeWith (x0,x1);
+        }
+      }
+    }
+  }
+}
+
+han <unsorted,sorted> sort () {
+  handle unsorted of {
+  | DONE -> {
+      await unsorted;
+      now <sorted> finish ();
+    }
+  | ANOTHER -> {
+      receive x0:int <- unsorted;
+      handle unsorted of 
+      | DONE -> { 
+          await unsorted;
+          now <sorted> finishWith (x0);
+        }
+      | ANOTHER -> {
+          receive x1:int <- unsorted;
+          open ins0 <-> unsorted0;
+          open ins1 <-> unsorted1;
+          open sorted0 <-> outs0;
+          open sorted1 <-> outs1;
+          start <unsorted,ins0,ins1> split(x0,x1);
+          start <unsorted0,sorted0> sort();
+          start <unsorted1,sorted1> sort();
+          now <sorted0,sorted1,sorted> merge ();
+      }
+    } 
+  }
+}
+
+han <cout,outs> putInts (arg:string) {
+  handle outs of {
+  | DONE -> {
+      select EOS -> cout;
+      close cout;
+      stop;
+    }
+  | ANOTHER -> {
+      receive next: int <- outs;
+      select LINE -> cout;
+      send arg -> cout;
+      now <cout,outs> putInts ();
+    }
+  }
+}
+
+han <cin,to_sort> getInts () {
+  handle cin of {
+  | EOS -> { 
+      await cin; 
+      select DONE -> to_sort;
+      close to_sort;
+      stop;
+    }
+  | LINE -> { 
+      receive line:string <- cin;
+      select ANOTHER -> to_sort;
+      send 42 -> ins;
+      now <cin,to_sort> getInts ();
+    }
+  }
+}
+
+han <cin,cout> main (args:string) {
+  open istream <-> unsorted;
+  open sorted <-> ostream;
+  start <cin,istream> getInts ();
+  start <unsorted,sorted> sort ();
+  start <cout,ostream> putInts (args);
+  stop;
+}

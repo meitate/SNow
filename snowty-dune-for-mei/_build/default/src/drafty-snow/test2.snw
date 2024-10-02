@@ -1,0 +1,64 @@
+han <c> min(x:int,y:int) { 
+  when x <= y 
+  do { 
+    send x -> c;
+    close c;
+    stop; 
+  } otherwise { 
+    send y -> c;
+    close c;
+    stop;
+  } 
+}
+
+han <dlr> housePlay (money:int,hand:int) {
+  when hand <= 16 do {
+    select HIT -> dlr;
+    receive card:int <- dlr;
+    handle dlr of
+    | WIN -> {
+        receive amount:int <- dlr;
+        now <dlr> housePlayAgain (money+amount); 
+      }
+    | LOSE -> {
+        receive amount:int <- dlr;
+        now <dlr> housePlayAgain (money-amount);
+      }
+    | MOVE -> {
+      now <dlr> houseHitOrStand (money,hand+card);
+      }
+  } otherwise {
+    select STAND -> dlr;
+    handle dlr of 
+    | WIN -> {
+        receive amount:int <- dlr;
+        now <dlr> housePlayAgain (money+amount); 
+      }
+    | LOSE -> {
+        receive amount:int <- dlr;
+        now <dlr> housePlayAgain (money-amount);
+      }
+  }
+}
+
+
+han <dlr> housePlay (money:int) {
+  recv card0 <- dlr; 
+  recv card1 <- dlr;
+  handle dlr of
+  | WIN -> { 
+      recv amount <- dlr;
+      housePlay (money+amount); 
+    }
+  | MOVE -> { 
+      now <dlr> houseHitOrStand (money,card0+card1); 
+  }
+}
+
+han <cin,cout> main(args:string) { 
+  open hous <-> plyr;
+  open idck <-> odck 
+  start <cin,plyr> player ("Jim",100);
+  start <idck> shuffle ();
+  now <cout,odck,hous> dealer(100);
+}

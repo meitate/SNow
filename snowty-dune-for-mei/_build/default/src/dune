@@ -1,0 +1,19 @@
+(executable
+ (name snow)
+ (modules snow parser lexer sess checker)
+ (libraries ast xntb menhirLib))
+
+(library
+ (name xntb)
+ (modules xntb)
+ (libraries ast))
+
+(library
+ (name ast)
+ (modules ast))
+
+(menhir
+ (modules parser)
+ (flags --explain --inspection --table --dump))
+
+(ocamllex lexer)

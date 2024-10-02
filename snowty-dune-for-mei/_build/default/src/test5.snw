@@ -1,0 +1,121 @@
+fun string_of_int (n:int) : string = "42"
+
+fun int_of_string (x:int) : int = 42
+
+han <cout,outs> putInts () {
+  handle outs of {
+  | ANOTHER -> {
+      receive next:int <- outs;
+      select LINE -> cout;
+      send string_of_int(next) -> cout;
+      now <cout,outs> putInts ();
+    }
+  | DONE -> {
+      await outs;
+      select EOS -> cout;
+      close cout;
+      stop;
+    }
+  }
+}
+
+
+han <cout,outs1,outs2> putIntsTwice () {
+  handle outs1 of {
+  | ANOTHER -> {
+      receive next:int <- outs1;
+      select LINE -> cout;
+      send string_of_int(next) -> cout;
+      now <cout,outs1,outs2> putIntsTwice ();
+    }
+  | DONE -> {
+      await outs1;
+      now <cout,outs2> putInts ();
+    }
+  }
+}
+
+han <cin,ins> getInts () {
+  handle cin of {
+  | EOS -> {
+      await cin;
+      select DONE -> ins;
+      close cin;
+      stop;
+    }
+  | LINE -> {
+      receive line:string <- cin;
+      select ANOTHER -> ins;
+      send int_of_string(line) -> ins;
+      now <cin,ins> getInts ();
+    }
+  }
+}
+
+han <ins,outs1,outs2> split () {
+  handle ins of {
+  | DONE -> {
+      await ins;
+      select DONE -> outs1;
+      close outs1;
+      select DONE -> outs2;
+      close outs2;
+      stop;
+    }
+  | ANOTHER -> {
+      receive x:int <- ins;
+      select ANOTHER -> outs1;
+      send x -> outs1;
+      now <ins,outs2,outs1> forward ();
+    }
+  }
+}
+
+han <ins0,ins1,outs> mergeNext (x0:int,x1:int) {
+  select ANOTHER -> outs; send x0 -> outs;
+  handle ins0 of {
+  | DONE -> {
+      await ins0;
+      select ANOTHER -> outs; send x1 -> outs;
+      now <ins1,outs> forward ();
+    }
+  | ANOTHER -> {
+      receive x2:int <- ins0;
+      now <ins0,ins1,outs> merge (x2,x1);
+    }
+  }
+}
+
+han <ins0,ins1,outs> mergeWith (x0:int,x1:int) {
+  when x0 <= x1 do {
+    now <ins0,ins1,outs> mergeNext (x0,x1);
+  } otherwise {
+    now <ins1,ins0,outs> mergeNext (x1,x0);
+  }
+}
+
+han <ins0,ins1,outs> merge () {
+  handle ins0 of {
+  | ANOTHER -> {
+      receive x0:int <- ins0;
+      handle ins1 of {
+      | ANOTHER -> {
+          receive x1:int <- ins1;
+          now <ins0,ins1,outs> mergeWith (x0,x1);
+        }
+      }
+    }
+  }
+}
+
+han <cin,cout> main (args:string) {
+  open istream <-> istream1;
+  open ostream <-> ostream1;
+  start <cin,istream> getInts ();
+  open ostream1a <-> ostreama;
+  open ostream1b <-> ostreamb;
+  start <istream1,ostream1a,ostream1b> split ();
+  start <ostreama,ostreamb,ostream> merge ();
+  start <cout,ostream1> putInts ();
+  stop;
+}

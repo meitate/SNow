@@ -1,0 +1,110 @@
+han <hd,tl> container (x:int) {
+  handle hd of {
+  | DEQUEUE -> {
+      send SOME(x) -> hd;
+      link hd <-> tl;
+      stop;
+    }
+  | DELETE -> {
+      await hd;
+      select DELETE -> hd;
+      close hd;
+      stop;
+    }      
+  }
+}
+
+han <q,hd,tl> sentinelQueue (x:int) {
+  handle q of {
+  | DELETE -> {
+      select DELETE -> hd;
+      close hd;
+      handle tl of {
+      | DELETE -> {
+          await tl;
+          await q;
+          stop;
+        }
+      }
+    }
+  | IS_EMPTY -> {
+      send false -> q;
+      loop;
+    }
+  | HEAD -> {
+      select HEAD -> hd;
+      select SOME(x) -> q;
+      loop;
+    } 
+  | ENQUEUE(y:int) -> {
+      start <tl,$tlp> container (y); 
+      now <q,hd,tlp> sentinelQueue (x);
+    }
+   | DEQUEUE -> {
+      select SOME(x) -> q;
+      when hd with tl {
+        now <q> queue ();
+      } otherwise {
+        select DEQUEUE -> hd;
+        receive y:int <- hd;
+        now <q,hd,tl> sentinelQueue (y);
+      }
+    }
+  }
+}
+
+han <q> queue () {
+  handle q of {
+  | DELETE -> {
+      await q;
+      stop;
+  | IS_EMPTY -> {
+      send true -> q;
+      loop;
+    }
+  | HEAD -> {
+      select NONE -> q;
+      loop;
+    } 
+  | ENQUEUE(x:int) -> {
+      start <$hd,$tl> container (x); 
+      now <q,hd,tl> queue ();
+    }
+  | DEQUEUE -> {
+      select NONE -> q;
+      loop;
+    }
+  }
+}
+
+han <q,hd,tl> queue () {
+  handle q of {
+  | IS_EMPTY -> {
+      send false -> q;
+      loop;
+    }
+  | HEAD -> {
+      select HEAD(x:int) <- hd;
+      select SOME(x) -> q;
+      loop;
+    }
+  | ENQUEUE(x:int) -> {
+      start <tl,$new_tl> container (x);
+      now <q,hd,new_tl> queue ();
+    }
+  | DEQUEUE -> {
+      select DEQUEUE(x:int) <- hd;
+      select SOME(x) -> q;
+      handle hd of {
+      | EMPTY -> {
+          close hd;
+          close tl;
+          now <q> emptyQueue ();
+        }
+      | NOT_EMPTY -> {
+          loop;
+        }
+      }
+    }
+  }
+}

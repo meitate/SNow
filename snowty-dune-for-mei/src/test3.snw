@@ -1,0 +1,40 @@
+han <cout,outs> putInts () {
+  handle outs of {
+  | DONE -> {
+      await outs;
+      select EOS -> cout;
+      close cout;
+      stop;
+    }
+  | ANOTHER -> {
+      receive next:int <- outs;
+      select LINE -> cout;
+      send 42 -> cout;
+      now <cout,outs> putInts ();
+    }
+  }
+}
+
+han <cin,ins> getInts () {
+  handle cin of {
+  | EOS -> { 
+      await cin; 
+      select DONE -> ins;
+      close ins;
+      stop;
+    }
+  | LINE -> { 
+      receive line:string <- cin;
+      select ANOTHER -> ins;
+      send 42 -> ins;
+      now <cin,ins> getInts ();
+    }
+  }
+}
+
+han <cin,cout> main (args:string) {
+  open istream <-> ostream;
+  start <cin,istream> getInts ();
+  start <cout,ostream> putInts ();
+  stop;
+}
